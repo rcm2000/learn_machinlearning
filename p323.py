@@ -1,19 +1,12 @@
 # -*- coding: utf-8 -*-
 
 # 기본 라이브러리 불러오기
-import warnings
-
 from sklearn import metrics
 from sklearn import tree
-from sklearn.ensemble import VotingClassifier, RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
-from sklearn.metrics import accuracy_score
-from sklearn import svm
 import pandas as pd
 import numpy as np
-from sklearn.neighbors import KNeighborsClassifier
-from xgboost import XGBClassifier
 
 '''
 [Step 1] 데이터 준비/ 기본 설정
@@ -86,51 +79,26 @@ print('\n')
 [Step 4] Decision Tree 분류 모형 - sklearn 사용
 '''
 
-# DT 모형 성능 평가 - 평가지표 계산
+# sklearn 라이브러리에서 Decision Tree 분류 모형 가져오기
+
+# 모형 객체 생성 (criterion='entropy' 적용)
 tree_model = tree.DecisionTreeClassifier(criterion='entropy', max_depth=5)
+
+# train data를 가지고 모형 학습
 tree_model.fit(X_train, y_train)
+
+# test data를 가지고 y_hat을 예측 (분류)
 y_hat = tree_model.predict(X_test)      # 2: benign(양성), 4: malignant(악성)
+
+print(y_hat[0:10])
+print(y_test.values[0:10])
+print('\n')
+
+# 모형 성능 평가 - Confusion Matrix 계산
+tree_matrix = metrics.confusion_matrix(y_test, y_hat)
+print(tree_matrix)
+print('\n')
+
+# 모형 성능 평가 - 평가지표 계산
 tree_report = metrics.classification_report(y_test, y_hat)
 print(tree_report)
-knn_acc = accuracy_score(y_test,y_hat);
-print('DT',knn_acc);
-
-
-# SVM 모형 성능 평가 - 평가지표 계산
-svm_model = svm.SVC(kernel='rbf')
-svm_model.fit(X_train, y_train)
-y_hat = svm_model.predict(X_test)
-svm_acc = accuracy_score(y_test,y_hat);
-print('SVM',svm_acc);
-
-# KNN모형 성능 평가 - 평가지표 계산
-knn_model = KNeighborsClassifier(n_neighbors=5)
-knn_model.fit(X_train, y_train)
-y_hat = knn_model.predict(X_test)
-knn_acc = accuracy_score(y_test,y_hat);
-print('KNN',knn_acc);
-
-# 앙상블모델 1 - voting 모형 성능 평가 - 평가지표 계산
-
-hvc = VotingClassifier(estimators=[('KNN',knn_model),
-                                   ('SVM',svm_model),
-                                   ('DT',tree_model)],voting='hard')
-hvc.fit(X_train,y_train);
-y_hat = hvc.predict(X_test);
-hvc_acc = accuracy_score(y_test,y_hat);
-print('HVC',hvc_acc);
-
-# 앙상블모델 2 -배깅 (random forest) 모형 성능 평가 - 평가지표 계산
-rfc = RandomForestClassifier(n_estimators=50,max_depth=5,random_state=10);
-rfc.fit(X_train, y_train);
-y_hat = rfc.predict(X_test)
-rfc_acc = accuracy_score(y_test,y_hat);
-print('RFC',rfc_acc);
-
-# 앙상블모델 3 -  Boosting 모형 성능 평가 - 평가지표 계산
-warnings.filterwarnings("ignore")
-xgbc = XGBClassifier(n_estimators=50,max_depth=5,random_state=10);
-xgbc.fit(X_train, y_train);
-y_hat = xgbc.predict(X_test)
-xgbc_acc = accuracy_score(y_test,y_hat);
-print('XGC',xgbc_acc);
